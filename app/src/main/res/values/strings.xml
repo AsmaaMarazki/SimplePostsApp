@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">PostsApplication</string>
+    <string name="try_again"><u>Try Again</u></string>
+    <string name="oops">Oops!!!</string>
+    <string name="no_posts">No Posts Found</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="no_comments">No comments yet</string>
+    <string name="comments">Comments</string>
+</resources>
