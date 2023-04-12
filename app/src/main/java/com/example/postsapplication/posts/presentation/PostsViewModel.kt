@@ -23,8 +23,8 @@ class PostsViewModel(
     )
     val postsFlow: Flow<List<PostInfoModel>> = _postsSharedFlow.distinctUntilChanged()
 
-    private val _postsErrorSharedFlow = MutableSharedFlow<Throwable?>()
-    val postsErrorSharedFlow: SharedFlow<Throwable?> = _postsErrorSharedFlow
+    private val _postsErrorSharedFlow = MutableSharedFlow<Throwable>()
+    val postsErrorSharedFlow: SharedFlow<Throwable> = _postsErrorSharedFlow
 
     private val _loadingStateFlow = MutableStateFlow(true)
     val loadingStateFlow: StateFlow<Boolean> = _loadingStateFlow
@@ -32,12 +32,11 @@ class PostsViewModel(
 
     fun getPosts() {
         viewModelScope.launch {
+            _loadingStateFlow.emit(true)
             try {
                 getPostsUseCase.execute().collect {
                     _loadingStateFlow.emit(false)
                     _postsSharedFlow.emit(it)
-                    _postsErrorSharedFlow.emit(null)
-
                 }
 
             } catch (e: Exception) {

@@ -27,6 +27,11 @@ class PostsFragment : Fragment() {
 
     private val postsViewModel: PostsViewModel by lazy { ViewModelProvider(this)[PostsViewModel::class.java] }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        postsViewModel.getPosts()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,7 +45,6 @@ class PostsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        postsViewModel.getPosts()
         collectLoading()
         collectPosts()
         collectError()
@@ -50,6 +54,8 @@ class PostsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        _errorBinding = null
+        _loadingBinding = null
     }
 
     private fun collectPosts() {
@@ -69,13 +75,11 @@ class PostsFragment : Fragment() {
         lifecycleScope.launch {
             postsViewModel.postsErrorSharedFlow.collect {
                 errorBinding.run {
-                    groupError.isVisible = it != null
-                    if (it != null) {
-                        tvTryAgain.setOnClickListener {
-                            postsViewModel.getPosts()
-                        }
+                    groupError.visibility = View.VISIBLE
+                    tvTryAgain.setOnClickListener {
+                        groupError.visibility = View.GONE
+                        postsViewModel.getPosts()
                     }
-
                 }
             }
         }

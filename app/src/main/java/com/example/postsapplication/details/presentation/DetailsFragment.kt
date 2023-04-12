@@ -34,9 +34,15 @@ class DetailsFragment : Fragment() {
     private var _loadingBinding: LayoutLoadingBinding? = null
     private val loadingBinding get() = _loadingBinding!!
 
-    private var postId: Int? = null
+    private var post: PostInfoModel? = null
 
     private val commentsViewModel: CommentsViewModel by lazy { ViewModelProvider(this)[CommentsViewModel::class.java] }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        post = getPost()
+        getComments()
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -62,17 +68,14 @@ class DetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val post = getPost()
         handlePostDetails(post)
-        postId = post?.id
-        getComments()
         collectLoading()
         collectError()
         collectComments()
     }
 
     private fun getComments() {
-        postId?.let {
+        post?.id?.let {
             commentsViewModel.getComments(it)
         }
     }
@@ -80,6 +83,9 @@ class DetailsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        _errorBinding = null
+        _loadingBinding = null
+        _postBinding = null
     }
 
     private fun getPost(): PostInfoModel? {
@@ -91,7 +97,6 @@ class DetailsFragment : Fragment() {
 
     private fun handlePostDetails(post: PostInfoModel?) {
         post?.run {
-            postId = id
             with(postBinding) {
                 tvUserName.text = userName
                 tvPostTitle.text = title
@@ -113,12 +118,14 @@ class DetailsFragment : Fragment() {
     private fun collectError() {
         lifecycleScope.launch {
             commentsViewModel.commentsErrorSharedFlow.collect {
-                errorBinding.groupError.isVisible = it != null
-                if (it != null) {
-                    errorBinding.tvTryAgain.setOnClickListener {
+                errorBinding.run {
+                    groupError.visibility = View.VISIBLE
+                    tvTryAgain.setOnClickListener {
+                        groupError.visibility = View.GONE
                         getComments()
                     }
                 }
+
             }
         }
     }

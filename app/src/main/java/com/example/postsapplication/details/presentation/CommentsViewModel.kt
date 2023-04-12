@@ -20,8 +20,8 @@ class CommentsViewModel(
     )
     val commentsFlow: Flow<List<CommentModel>> = _commentsSharedFlow.distinctUntilChanged()
 
-    private val _commentsErrorSharedFlow = MutableSharedFlow<Throwable?>()
-    val commentsErrorSharedFlow: SharedFlow<Throwable?> = _commentsErrorSharedFlow
+    private val _commentsErrorSharedFlow = MutableSharedFlow<Throwable>()
+    val commentsErrorSharedFlow: SharedFlow<Throwable> = _commentsErrorSharedFlow
 
     private val _loadingStateFlow = MutableStateFlow(true)
     val loadingStateFlow: StateFlow<Boolean> = _loadingStateFlow
@@ -29,12 +29,11 @@ class CommentsViewModel(
 
     fun getComments(postId: Int) {
         viewModelScope.launch {
+            _loadingStateFlow.emit(true)
             try {
                 val comments = getCommentsUseCase.execute(postId)
                 _loadingStateFlow.emit(false)
                 _commentsSharedFlow.emit(comments)
-                _commentsErrorSharedFlow.emit(null)
-
             } catch (e: Exception) {
                 _loadingStateFlow.emit(false)
                 _commentsErrorSharedFlow.emit(e)
